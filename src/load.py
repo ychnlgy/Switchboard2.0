@@ -87,7 +87,7 @@ def remove_noise(data):
 def convert_key2idx(keymap, y):
     out = []
     for arr in tqdm.tqdm(y, desc="Converting labels to ints", ncols=80):
-        out.append([keymap[v] for v in arr])
+        out.append(numpy.array([keymap[v] for v in arr]))
     return out
 
 def save_label_map(labels, fname):
