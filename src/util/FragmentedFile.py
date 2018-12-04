@@ -21,7 +21,6 @@ class FragmentedFile:
     
     def dump(self, n, it):
         self.n = n
-        assert not os.path.isfile(self.f)
         with open(self.f, "wb") as f:
             numpy.save(f, FragmentedFile.KEY + str(n))
             it = zip(range(1, n+1), it)
