@@ -103,7 +103,7 @@ def load_label_map(fname):
 
 def _load(dataf):
     with open(dataf, "rb") as f:
-        i = 2
+        i = 1
         with tqdm.tqdm(desc="Loading %s" % dataf, ncols=80) as bar:
             while True:
                 try:
