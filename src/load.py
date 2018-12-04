@@ -126,6 +126,6 @@ def match_labels(wav, phns):
         labels[start:end] = [name] * (end-start)
     return labels
 
-@util.main
+@util.main(__name__)
 def main(dataf):
     create_spectrograms(dataf)

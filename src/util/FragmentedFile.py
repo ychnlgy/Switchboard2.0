@@ -16,14 +16,14 @@ class FragmentedFile:
     def load(self):
         with open(self.f, "rb") as f:
             self.n = self._loadkey(f)
-            for i in tqdm.tqdm(range(self.n), desc="Loading %s" % self.f, ncols=80):
+            for i in tqdm.tqdm(range(self.n), desc="Load << %s" % self.f, ncols=80):
                 yield numpy.load(f)
     
     def dump(self, n, it):
         self.n = n
         with open(self.f, "wb") as f:
             numpy.save(f, FragmentedFile.KEY + str(n))
-            counter = tqdm.tqdm(range(1, n+1), desc="Dumping to %s" % self.f, ncols=80)
+            counter = tqdm.tqdm(range(1, n+1), desc="Dump >> %s" % self.f, ncols=80)
             for i, data in zip(counter, it):
                 numpy.save(f, data)
         assert i == n
