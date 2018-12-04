@@ -6,6 +6,7 @@ RATE = 8000
 NUMCEP = 16
 
 LABEL_SAVE_JSON = "switchboard-labels.json"
+EMPTY = "<EMPTY>"
 
 def load(dataf):
     "Returns paired X and y for speakers A and B."
@@ -57,7 +58,7 @@ def save_label_map(labels, fname):
 
 def load_label_map(fname):
     with open(fname, "r") as f:
-        labels = json.load(f)
+        labels = json.load(f) + [EMPTY]
         idxmap = dict(enumerate(labels))
         keymap = {k:i for i, k in idxmap.items()}
         return keymap, idxmap
@@ -75,18 +76,10 @@ def _load(dataf):
 def convert_spectrogram(wav):
     return speech_features.mfcc(wav, samplerate=RATE, numcep=NUMCEP)
 
-def match_labels(wav, mel, phns):
-    t0 = wav.shape[0]
-    tf = mel.shape[0]
-    ratio = tf/t0
-    labels = []
+def match_labels(wav, phns):
+    labels = [EMPTY] * len(wav)
     for name, start, end, pid in phns:
-        ci = int(round(start*ratio))
-        cf = int(round(end*ratio))
-        if not cf > ci:
-            print(cf, ci, start, end, ratio)
-            input()
-            assert cf == ci
-            continue
-        labels.extend((cf-ci)*[name])
+        if start > end:
+            start, end = end, start
+        labels[start:end] = [name] * (end-start)
     return labels
