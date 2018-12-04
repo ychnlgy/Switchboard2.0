@@ -23,9 +23,8 @@ class FragmentedFile:
         self.n = n
         with open(self.f, "wb") as f:
             numpy.save(f, FragmentedFile.KEY + str(n))
-            it = zip(range(1, n+1), it)
-            it = tqdm.tqdm(it, desc="Dumping to %s" % self.f, ncols=80)
-            for i, data in it:
+            counter = tqdm.tqdm(range(1, n+1), desc="Dumping to %s" % self.f, ncols=80)
+            for i, data in zip(counter, it):
                 numpy.save(f, data)
         assert i == n
     
