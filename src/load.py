@@ -17,12 +17,31 @@ LABEL_SAVE_JSON = "switchboard-labels.json"
 OUT_FILE = "melspecs-switchboard.npy"
 EMPTY = "<EMPTY>"
 
-def load(dataf):
-    fragfile = util.FragmentedFile(dataf)
+def load(specf):
+    fragfile = util.FragmentedFile(specf)
     return fragfile.load()
 
+def view(specf):
+    SAMPLES = 5
+    
+    import matplotlib
+    matplotlib.use("agg")
+    from matplotlib import pyplot
+    
+    data = load(specf)
+    
+    fig, axes = pyplot.subplots(nrows=2, ncols=SAMPLES, sharex=True)
+    fig.set_size_inches(18, 6)
+    
+    for i, (x, y) in zip(range(SAMPLES), data):
+        axes[0, i].imshow(x, cmap="hot")
+        y = util.onehot(y).T
+        for j in range(len(y)):
+            axes[1, i].plot(y[j])
+    
+    pyplot.savefig("switchboard-mfcc-samples.png", bbox_inches="tight")
+
 def create_spectrograms(dataf):
-    "Returns paired X and y for speakers A and B."
     data = list(_load(dataf))
     
     Xa = []
@@ -127,5 +146,9 @@ def match_labels(wav, phns):
     return labels
 
 @util.main(__name__)
-def main(dataf):
-    create_spectrograms(dataf)
+def main(fname, sample=0):
+    sample = int(sample)
+    if sample:
+        view(fname)
+    else:
+        create_spectrograms(fname)
