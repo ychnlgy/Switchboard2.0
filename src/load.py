@@ -125,15 +125,11 @@ def load_label_map(fname):
 
 def _load(dataf):
     with open(dataf, "rb") as f:
-        i = 1
         with tqdm.tqdm(desc="Loading %s" % dataf, ncols=80) as bar:
             while True:
                 try:
                     yield numpy.load(f)
                     bar.update()
-                    i -= 1
-                    if i < 0:
-                        break
                 except OSError:
                     break
 
