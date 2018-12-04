@@ -11,7 +11,7 @@ RATE = 8000
 NUMCEP = 16
 
 LENGTH = 8000
-STEP = 1000
+STEP = 2000
 
 LABEL_SAVE_JSON = "switchboard-labels.json"
 OUT_FILE = "melspecs-switchboard.npy"
