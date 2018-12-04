@@ -38,12 +38,12 @@ def create_spectrograms(dataf):
         labA = match_labels(waveA, pA)
         labB = match_labels(waveB, pB)
         
-        for wavA, slcA in slice_step(waveA, labA, LENGTH, STEP):
+        for wavA, slcA in slice_step(waveA, labA, LENGTH, STEP, "A"):
             melA = convert_spectrogram(wavA)
             Xa.append(melA)
             ya.append(slcA)
         
-        for wavB, slcB in slice_step(waveB, labB, LENGTH, STEP):
+        for wavB, slcB in slice_step(waveB, labB, LENGTH, STEP, "B"):
             melB = convert_spectrogram(wavB)
             Xb.append(melB)
             yb.append(slcB)
@@ -71,10 +71,10 @@ def create_spectrograms(dataf):
 
 # === PRIVATE ===
 
-def slice_step(wav, lab, length, step):
+def slice_step(wav, lab, length, step, name):
     assert len(wav) == len(lab) > length
     d, r = divmod(len(wav)-length, step)
-    for i in tqdm.tqdm(range(0, d*step, step), desc="Slicing waves", ncols=80):
+    for i in tqdm.tqdm(range(0, d*step, step), desc="Slicing %s waves" % name, ncols=80):
         yield wav[i:i+length], lab[i:i+length]
     if r:
         yield wav[-length:], lab[-length:]
@@ -86,7 +86,7 @@ def remove_noise(data):
 
 def convert_key2idx(keymap, y):
     out = []
-    for arr in y:
+    for arr in tqdm.tqdm(y, desc="Converting labels to ints", ncols=80):
         out.append([keymap[v] for v in arr])
     return out
 
@@ -103,7 +103,7 @@ def load_label_map(fname):
 
 def _load(dataf):
     with open(dataf, "rb") as f:
-        i = 3
+        i = 2
         with tqdm.tqdm(desc="Loading %s" % dataf, ncols=80) as bar:
             while True:
                 try:
