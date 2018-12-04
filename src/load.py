@@ -1,6 +1,6 @@
 #!/usr/bin/python3
 
-import numpy, tqdm, json, os
+import numpy, tqdm, json, os, random
 import scipy.signal
 
 import util
@@ -16,6 +16,8 @@ STEP = 4000
 LABEL_SAVE_JSON = "switchboard-labels.json"
 OUT_FILE = "melspecs-switchboard.npy"
 EMPTY = "<EMPTY>"
+SIL = "SIL"
+SIL_DROPOUT = 0.5
 
 def load(specf):
     fragfile = util.FragmentedFile(specf)
@@ -61,14 +63,16 @@ def create_spectrograms(dataf):
         labB = match_labels(waveB, pB)
         
         for wavA, slcA in slice_step(waveA, labA, LENGTH, STEP, "A"):
-            melA = convert_spectrogram(wavA)
-            Xa.append(melA)
-            ya.append(slcA)
+            if keep_slice(slcA):
+                melA = convert_spectrogram(wavA)
+                Xa.append(melA)
+                ya.append(slcA)
         
         for wavB, slcB in slice_step(waveB, labB, LENGTH, STEP, "B"):
-            melB = convert_spectrogram(wavB)
-            Xb.append(melB)
-            yb.append(slcB)
+            if keep_slice(slcB):
+                melB = convert_spectrogram(wavB)
+                Xb.append(melB)
+                yb.append(slcB)
     
         all_labels.update(labA + labB)
     
@@ -104,6 +108,12 @@ def create_spectrograms(dataf):
 
 SKIPPED = 0
 
+def keep_slice(slc):
+    if (slc == SIL).all():
+        return random.random() > SIL_DROPOUT
+    else:
+        return True
+
 def slice_step(wav, lab, length, step, name):
     if len(wav) == len(lab) and len(wav) > length:
         d, r = divmod(len(wav)-length, step)
@@ -132,7 +142,7 @@ def save_label_map(labels, fname):
 
 def load_label_map(fname):
     with open(fname, "r") as f:
-        labels = json.load(f) + [EMPTY]
+        labels = json.load(f)
         idxmap = dict(enumerate(labels))
         keymap = {k:i for i, k in idxmap.items()}
         return keymap, idxmap
