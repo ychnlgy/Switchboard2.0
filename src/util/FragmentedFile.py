@@ -31,6 +31,6 @@ class FragmentedFile:
     def _loadkey(self, f):
         key = numpy.load(f)[0]
         assert key.startswith(FragmentedFile.KEY)
-        num = key.rstrip(FragmentedFile.KEY)
+        num = key.lstrip(FragmentedFile.KEY)
         assert num.isdigit()
         return int(num)
