@@ -82,6 +82,8 @@ def match_labels(wav, mel, phns):
     for name, start, end, pid in phns:
         ci = int(round(start*tf/t0))
         cf = int(round(end*tf/t0))
-        assert cf > ci
+        if not cf > ci:
+            assert cf == ci
+            continue
         labels.extend((cf-ci)*[name])
     return labels
