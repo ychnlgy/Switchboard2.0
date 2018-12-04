@@ -1,4 +1,4 @@
-import numpy, tqdm, os
+import numpy, tqdm
 
 class FragmentedFile:
 
