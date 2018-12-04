@@ -33,9 +33,12 @@ def view(specf):
     fig, axes = pyplot.subplots(nrows=2, ncols=SAMPLES, sharex=True)
     fig.set_size_inches(18, 6)
     
+    kmap, imap = load_label_map(os.path.join(os.path.dirname(specf), LABEL_SAVE_JSON))
+    size = len(kmap)
+    
     for i, (x, y) in zip(range(SAMPLES), data):
         axes[0, i].imshow(x, cmap="hot")
-        y = util.onehot(y).T
+        y = util.onehot(y, size).T
         for j in range(len(y)):
             axes[1, i].plot(y[j])
     
