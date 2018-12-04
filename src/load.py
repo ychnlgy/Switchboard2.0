@@ -74,7 +74,7 @@ def create_spectrograms(dataf):
 def slice_step(wav, lab, length, step):
     assert len(wav) == len(lab) > length
     d, r = divmod(len(wav)-length, step)
-    for i in range(0, d*step, step):
+    for i in tqdm.tqdm(range(0, d*step, step), desc="Slicing waves", ncols=80):
         yield wav[i:i+length], lab[i:i+length]
     if r:
         yield wav[-length:], lab[-length:]
