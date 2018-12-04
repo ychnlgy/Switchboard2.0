@@ -83,6 +83,8 @@ def match_labels(wav, mel, phns):
         ci = int(round(start*tf/t0))
         cf = int(round(end*tf/t0))
         if not cf > ci:
+            print(cf, ci)
+            input()
             assert cf == ci
             continue
         labels.extend((cf-ci)*[name])
