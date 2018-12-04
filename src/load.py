@@ -78,12 +78,13 @@ def convert_spectrogram(wav):
 def match_labels(wav, mel, phns):
     t0 = wav.shape[0]
     tf = mel.shape[0]
+    ratio = tf/t0
     labels = []
     for name, start, end, pid in phns:
-        ci = int(round(start*tf/t0))
-        cf = int(round(end*tf/t0))
+        ci = int(round(start*ratio))
+        cf = int(round(end*ratio))
         if not cf > ci:
-            print(cf, ci)
+            print(cf, ci, start, end, ratio)
             input()
             assert cf == ci
             continue
