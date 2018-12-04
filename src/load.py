@@ -1,14 +1,27 @@
-import numpy, tqdm, json
+#!/usr/bin/python3
+
+import numpy, tqdm, json, os
+import scipy.signal
+
+import util
 
 import speech_features
 
 RATE = 8000
 NUMCEP = 16
 
+LENGTH = 8000
+STEP = 1000
+
 LABEL_SAVE_JSON = "switchboard-labels.json"
+OUT_FILE = "melspecs-switchboard.npy"
 EMPTY = "<EMPTY>"
 
 def load(dataf):
+    fragfile = util.FragmentedFile(dataf)
+    return fragfile.load()
+
+def create_spectrograms(dataf):
     "Returns paired X and y for speakers A and B."
     data = list(_load(dataf))
     
@@ -20,31 +33,56 @@ def load(dataf):
     
     for num, rate, waveA, waveB, pA, pB, sA, sB in tqdm.tqdm(data, desc="Processing data", ncols=80):
         assert rate == RATE
-        melA = convert_spectrogram(waveA)
-        melB = convert_spectrogram(waveB)
+        waveA = remove_noise(waveA)
+        waveB = remove_noise(waveB)
         labA = match_labels(waveA, pA)
         labB = match_labels(waveB, pB)
         
-        Xa.append(melA)
-        Xb.append(melB)
-        ya.append(labA)
-        yb.append(labB)
+        for wavA, slcA in slice_step(waveA, labA, LENGTH, STEP):
+            melA = convert_spectrogram(wavA)
+            Xa.append(melA)
+            ya.append(slcA)
+        
+        for wavB, slcB in slice_step(waveB, labB, LENGTH, STEP):
+            melB = convert_spectrogram(wavB)
+            Xb.append(melB)
+            yb.append(slcB)
     
         all_labels.update(labA + labB)
     
     all_labels = sorted(all_labels)
-    save_label_map(all_labels, LABEL_SAVE_JSON)
-    keymap, idxmap = load_label_map(LABEL_SAVE_JSON)
+    
+    DATA_DIR = os.path.dirname(dataf)
+    
+    label_file = os.path.join(DATA_DIR, LABEL_SAVE_JSON)
+    save_label_map(all_labels, label_file)
+    keymap, idxmap = load_label_map(label_file)
     ya = convert_key2idx(keymap, ya)
     yb = convert_key2idx(keymap, yb)
-    return (
-        numpy.array(Xa),
-        numpy.array(Xb),
-        numpy.array(ya),
-        numpy.array(yb)
-    )
+    assert len(Xa) == len(Xb) == len(ya) == len(yb)
+    
+    out_file = os.path.join(DATA_DIR, OUT_FILE)
+    X = Xa + Xb
+    Y = ya + yb
+    assert len(X) == len(Y)
+    
+    fragfile = util.FragmentedFile(out_file)
+    fragfile.dump(len(X), zip(X, Y))
 
 # === PRIVATE ===
+
+def slice_step(wav, lab, length, step):
+    assert len(wav) == len(lab) > length
+    d, r = divmod(len(wav)-length, step)
+    for i in range(0, d*step, step):
+        yield wav[i:i+length], lab[i:i+length]
+    if r:
+        yield wav[-length:], lab[-length:]
+
+def remove_noise(data):
+    b, a = scipy.signal.butter(2, 40/(8000/2), btype="highpass")
+    data = scipy.signal.lfilter(b, a, data)
+    return data
 
 def convert_key2idx(keymap, y):
     out = []
@@ -83,3 +121,7 @@ def match_labels(wav, phns):
             start, end = end, start
         labels[start:end] = [name] * (end-start)
     return labels
+
+@util.main
+def main(dataf):
+    create_spectrograms(dataf)
