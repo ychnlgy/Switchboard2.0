@@ -30,7 +30,7 @@ def view(specf):
     
     data = load(specf)
     
-    fig, axes = pyplot.subplots(nrows=2, ncols=SAMPLES, sharex=True)
+    fig, axes = pyplot.subplots(nrows=2, ncols=SAMPLES)
     fig.set_size_inches(18, 6)
     
     kmap, imap = load_label_map(os.path.join(os.path.dirname(specf), LABEL_SAVE_JSON))
