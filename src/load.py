@@ -37,7 +37,7 @@ def view(specf):
     size = len(kmap)
     
     for i, (x, y) in zip(range(SAMPLES), data):
-        axes[0, i].imshow(x, cmap="hot", interpolation="bicubic", aspect="auto")
+        axes[0, i].imshow(x.T, cmap="hot", interpolation="bicubic", aspect="auto")
         y = util.onehot(y, size).T
         for j in range(len(y)):
             axes[1, i].plot(y[j])
