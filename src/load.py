@@ -89,7 +89,8 @@ def create_spectrograms(dataf):
     keymap, idxmap = load_label_map(label_file)
     ya = convert_key2idx(keymap, ya)
     yb = convert_key2idx(keymap, yb)
-    assert len(Xa) == len(Xb) == len(ya) == len(yb)
+    assert len(Xa) == len(ya)
+    assert len(Xb) == len(yb)
     
     out_file = os.path.join(DATA_DIR, OUT_FILE)
     X = Xa + Xb
