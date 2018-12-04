@@ -109,7 +109,7 @@ def create_spectrograms(dataf):
 SKIPPED = 0
 
 def keep_slice(slc):
-    if (slc == SIL).all():
+    if all([v==SIL for v in slc]):
         return random.random() > SIL_DROPOUT
     else:
         return True
