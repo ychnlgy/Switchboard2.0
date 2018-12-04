@@ -72,6 +72,14 @@ def create_spectrograms(dataf):
     
         all_labels.update(labA + labB)
     
+    print('''
+    ***
+    
+    Skipped %d files because they were shorter than 1 second.
+    
+    ***
+    ''' % SKIPPED)
+    
     all_labels = sorted(all_labels)
     
     DATA_DIR = os.path.dirname(dataf)
@@ -93,13 +101,18 @@ def create_spectrograms(dataf):
 
 # === PRIVATE ===
 
+SKIPPED = 0
+
 def slice_step(wav, lab, length, step, name):
-    assert len(wav) == len(lab) > length
-    d, r = divmod(len(wav)-length, step)
-    for i in tqdm.tqdm(range(0, d*step, step), desc="Slicing %s waves" % name, ncols=80):
-        yield wav[i:i+length], lab[i:i+length]
-    if r:
-        yield wav[-length:], lab[-length:]
+    if len(wav) == len(lab) and len(wav) > length:
+        d, r = divmod(len(wav)-length, step)
+        for i in tqdm.tqdm(range(0, d*step, step), desc="Slicing %s waves" % name, ncols=80):
+            yield wav[i:i+length], lab[i:i+length]
+        if r:
+            yield wav[-length:], lab[-length:]
+    else:
+        global SKIPPED
+        SKIPPED += 1
 
 def remove_noise(data):
     b, a = scipy.signal.butter(2, 40/(8000/2), btype="highpass")
