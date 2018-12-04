@@ -10,8 +10,8 @@ import speech_features
 RATE = 8000
 NUMCEP = 16
 
-LENGTH = 8000
-STEP = 2000
+LENGTH = 4000
+STEP = 4000
 
 LABEL_SAVE_JSON = "switchboard-labels.json"
 OUT_FILE = "melspecs-switchboard.npy"
