@@ -22,8 +22,8 @@ def load(dataf):
         assert rate == RATE
         melA = convert_spectrogram(waveA)
         melB = convert_spectrogram(waveB)
-        labA = match_labels(waveA, melA, pA)
-        labB = match_labels(waveB, melB, pB)
+        labA = match_labels(waveA, pA)
+        labB = match_labels(waveB, pB)
         
         Xa.append(melA)
         Xb.append(melB)
