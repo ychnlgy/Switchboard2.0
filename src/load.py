@@ -12,7 +12,7 @@ NUMCEP = 16
 CLASSES = 45
 
 LENGTH = 4000
-DELTA = 2000
+DELTA = 1000
 LABEL_SCALE = 100
 
 LABEL_SAVE_JSON = "switchboard-labels.json"
@@ -56,26 +56,30 @@ def create_spectrograms(dataf):
     Xb = []
     ya = []
     yb = []
+    la = []
+    lb = []
     all_labels = set()
     
     for num, rate, waveA, waveB, pA, pB, sA, sB in tqdm.tqdm(data, desc="Processing data", ncols=80):
         assert rate == RATE
         waveA = remove_noise(waveA)
         waveB = remove_noise(waveB)
-        labA = match_labels(waveA, pA)
-        labB = match_labels(waveB, pB)
+        yA = match_labels(waveA, pA)
+        yB = match_labels(waveB, pB)
         
-        for wavA, slcA in slice_step(waveA, labA, LENGTH, DELTA):
+        for wavA, slcA, slcy in slice_step(waveA, yA, pA, LENGTH, DELTA):
             if keep_slice(slcA):
                 melA = convert_spectrogram(wavA)
                 Xa.append(melA)
                 ya.append(slcA)
+                la.append(slcy)
         
-        for wavB, slcB in slice_step(waveB, labB, LENGTH, DELTA):
+        for wavB, slcB, slcy in slice_step(waveB, yB, pB, LENGTH, DELTA):
             if keep_slice(slcB):
                 melB = convert_spectrogram(wavB)
                 Xb.append(melB)
                 yb.append(slcB)
+                lb.append(slcy)
     
         all_labels.update(labA + labB)
     
@@ -88,6 +92,7 @@ def create_spectrograms(dataf):
     ''' % SKIPPED)
     
     all_labels = sorted(all_labels)
+    assert all_labels[0] == EMPTY
     assert len(all_labels) == CLASSES + 1
     
     DATA_DIR = os.path.dirname(dataf)
@@ -97,20 +102,34 @@ def create_spectrograms(dataf):
     keymap, idxmap = load_label_map(label_file)
     ya = convert_key2idx(keymap, ya)
     yb = convert_key2idx(keymap, yb)
+    la = convert_key2idx(keymap, la)
+    lb = convert_key2idx(keymap, lb)
     assert len(Xa) == len(ya)
     assert len(Xb) == len(yb)
+    assert len(la) == len(lb)
     
     out_file = os.path.join(DATA_DIR, OUT_FILE)
     X = Xa + Xb
     Y = ya + yb
-    assert len(X) == len(Y)
+    L = la + lb
+    assert len(X) == len(Y) == len(L)
+    L = pad_fitlargest(L)
     
     fragfile = util.FragmentedFile(out_file)
-    fragfile.dump(len(X), zip(X, Y))
+    fragfile.dump(len(X), zip(X, Y, L))
 
 # === PRIVATE ===
 
 SKIPPED = 0
+
+def pad_fitlargest(labels):
+    "Because the first class is EMPTY, we can use that as padding."
+    longest = max(map(len, labels))
+    def pad(arr):
+        out = numpy.zeros(longest).astype(numpy.int32)
+        out[:len(arr)] = arr
+        return out
+    return list(map(pad, labels))
 
 def keep_slice(slc):
     if all([v==SIL for v in slc]):
@@ -118,13 +137,27 @@ def keep_slice(slc):
     else:
         return True
 
-def slice_step(wav, lab, length, step):
+def slice_step(wav, lab, phns, length, step):
     if len(wav) == len(lab) and len(wav) > length:
+    
+        def locate_phns(i):
+            out = []
+            for name, start, end, pid in phns:
+                if start > end:
+                    start, end = end, start
+                if start >= i+step:
+                    break
+                elif end < i:
+                    continue
+                else:
+                    out.append(name)
+            return out
+    
         d, r = divmod(len(wav)-length, step)
         for i in range(0, d*step, step):
-            yield wav[i:i+length], lab[i:i+length][::LABEL_SCALE]
+            yield wav[i:i+length], lab[i:i+length][::LABEL_SCALE], locate_phns(i)
         if r:
-            yield wav[-length:], lab[-length:][::LABEL_SCALE]
+            yield wav[-length:], lab[-length:][::LABEL_SCALE], locate_phns(len(wav)-length)
     else:
         global SKIPPED
         SKIPPED += 1
@@ -167,12 +200,12 @@ def convert_spectrogram(wav):
     return speech_features.mfcc(wav, samplerate=RATE, numcep=NUMCEP)
 
 def match_labels(wav, phns):
-    labels = [EMPTY] * len(wav)
+    y = [EMPTY] * len(wav)
     for name, start, end, pid in phns:
         if start > end:
             start, end = end, start
-        labels[start:end] = [name] * (end-start)
-    return labels
+        y[start:end] = [name] * (end-start)
+    return y
 
 @util.main(__name__)
 def main(fname, sample=0):

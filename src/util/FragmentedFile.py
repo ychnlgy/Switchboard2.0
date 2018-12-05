@@ -9,8 +9,8 @@ class FragmentedFile:
     def __init__(self, f):
         self.f = f
         self.n = None
-        self.load_desc = ("Load << %s..." % self.f)[:MAX_DESC]
-        self.dump_desc = ("Dump >> %s..." % self.f)[:MAX_DESC]
+        self.load_desc = ("Load << %s" % self.f)[:MAX_DESC]
+        self.dump_desc = ("Dump >> %s" % self.f)[:MAX_DESC]
     
     def __len__(self):
         if self.n is None:
