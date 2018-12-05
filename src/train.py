@@ -1,6 +1,7 @@
 #!/usr/bin/python3
 
 import numpy, torch, tqdm
+import torch.utils.data
 
 import util, torchmods, load
 
