@@ -11,7 +11,8 @@ RATE = 8000
 NUMCEP = 16
 
 LENGTH = 4000
-STEP = 4000
+DELTA = 4000
+LABEL_SCALE = 200
 
 LABEL_SAVE_JSON = "switchboard-labels.json"
 OUT_FILE = "melspecs-switchboard.npy"
@@ -20,6 +21,7 @@ SIL = "SIL"
 SIL_DROPOUT = 0.5
 
 def load(specf):
+    specf = os.path.join(specf, OUT_FILE)
     fragfile = util.FragmentedFile(specf)
     return fragfile.load()
 
@@ -35,7 +37,7 @@ def view(specf):
     fig, axes = pyplot.subplots(nrows=2, ncols=SAMPLES)
     fig.set_size_inches(18, 6)
     
-    kmap, imap = load_label_map(os.path.join(os.path.dirname(specf), LABEL_SAVE_JSON))
+    kmap, imap = load_label_map(os.path.join(specf, LABEL_SAVE_JSON))
     size = len(kmap)
     
     for i, (x, y) in zip(range(SAMPLES), data):
@@ -62,13 +64,13 @@ def create_spectrograms(dataf):
         labA = match_labels(waveA, pA)
         labB = match_labels(waveB, pB)
         
-        for wavA, slcA in slice_step(waveA, labA, LENGTH, STEP, "A"):
+        for wavA, slcA in slice_step(waveA, labA, LENGTH, DELTA, "A"):
             if keep_slice(slcA):
                 melA = convert_spectrogram(wavA)
                 Xa.append(melA)
                 ya.append(slcA)
         
-        for wavB, slcB in slice_step(waveB, labB, LENGTH, STEP, "B"):
+        for wavB, slcB in slice_step(waveB, labB, LENGTH, DELTA, "B"):
             if keep_slice(slcB):
                 melB = convert_spectrogram(wavB)
                 Xb.append(melB)
@@ -143,6 +145,7 @@ def save_label_map(labels, fname):
 def load_label_map(fname):
     with open(fname, "r") as f:
         labels = json.load(f)
+        print("Classes: %d" % (len(labels)-1))
         idxmap = dict(enumerate(labels))
         keymap = {k:i for i, k in idxmap.items()}
         return keymap, idxmap
@@ -166,7 +169,7 @@ def match_labels(wav, phns):
         if start > end:
             start, end = end, start
         labels[start:end] = [name] * (end-start)
-    return labels
+    return labels[::LABEL_SCALE]
 
 @util.main(__name__)
 def main(fname, sample=0):
