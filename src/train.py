@@ -11,6 +11,7 @@ def load_dataset(datadir, batchsize=300, validsplit=0.2):
     for x, y, l in load.load(datadir):
         X.append(x)
         Y.append(y)
+        L.append(l)
     
     X = numpy.array(X)
     Y = numpy.array(Y)
