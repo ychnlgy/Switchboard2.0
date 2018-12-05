@@ -73,6 +73,7 @@ def create_spectrograms(dataf):
                 Xa.append(melA)
                 ya.append(slcA)
                 la.append(slcy)
+                all_labels.update(slcA)
         
         for wavB, slcB, slcy in slice_step(waveB, yB, pB, LENGTH, DELTA):
             if keep_slice(slcB):
@@ -80,8 +81,7 @@ def create_spectrograms(dataf):
                 Xb.append(melB)
                 yb.append(slcB)
                 lb.append(slcy)
-    
-        all_labels.update(ya + yb)
+                all_labels.update(slcB)
     
     print('''
     ***
