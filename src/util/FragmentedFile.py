@@ -20,6 +20,7 @@ class FragmentedFile:
     def load(self):
         with open(self.f, "rb") as f:
             self.n = self._loadkey(f)
+            self.n = 3000
             for i in tqdm.tqdm(range(self.n), desc=self.load_desc, ncols=80):
                 yield numpy.load(f)
     

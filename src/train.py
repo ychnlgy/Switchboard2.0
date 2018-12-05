@@ -28,10 +28,11 @@ def load_dataset(datadir, batchsize=300, validsplit=0.2):
     testloader = make_dataloader(X[vidx], Y[vidx], L[vidx], batchsize)
     return dataloader, testloader
 
-def make_dataloader(X, Y, batchsize):
+def make_dataloader(X, Y, L, batchsize):
     X = torch.from_numpy(X)
     Y = torch.from_numpy(Y)
-    dataset = torch.utils.data.TensorDataset(X, Y)
+    L = torch.from_numpy(L)
+    dataset = torch.utils.data.TensorDataset(X, Y, L)
     loader = torch.utils.data.DataLoader(dataset, batch_size=batchsize, shuffle=True)
     return loader
 
@@ -64,7 +65,7 @@ def main(
         
         bar = tqdm.tqdm(dataloader, ncols=80)
         
-        for X, y, labels in bar:
+        for X, y, l in bar:
             X = X.to(device)
             y = y.to(device)
             l = l.to(device)
@@ -90,7 +91,7 @@ def main(
             
             bar = tqdm.tqdm(testloader, ncols=80)
             
-            for X, y, labels in bar:
+            for X, y, l in bar:
                 X = X.to(device)
                 y = y.to(device)
                 l = l.to(device)
