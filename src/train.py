@@ -30,9 +30,9 @@ def load_dataset(datadir, batchsize=300, validsplit=0.2):
     return dataloader, testloader
 
 def make_dataloader(X, Y, L, batchsize):
-    X = torch.from_numpy(X)
-    Y = torch.from_numpy(Y)
-    L = torch.from_numpy(L)
+    X = torch.from_numpy(X).float()
+    Y = torch.from_numpy(Y).long()
+    L = torch.from_numpy(L).long()
     dataset = torch.utils.data.TensorDataset(X, Y, L)
     loader = torch.utils.data.DataLoader(dataset, batch_size=batchsize, shuffle=True)
     return loader
