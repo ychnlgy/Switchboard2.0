@@ -12,7 +12,7 @@ NUMCEP = 16
 CLASSES = 45
 
 LENGTH = 4000
-DELTA = 1000
+DELTA = 2000
 LABEL_SCALE = 100
 
 LABEL_SAVE_JSON = "switchboard-labels.json"
