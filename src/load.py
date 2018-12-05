@@ -9,6 +9,7 @@ import speech_features
 
 RATE = 8000
 NUMCEP = 16
+CLASSES = 45
 
 LENGTH = 4000
 DELTA = 4000
@@ -64,13 +65,13 @@ def create_spectrograms(dataf):
         labA = match_labels(waveA, pA)
         labB = match_labels(waveB, pB)
         
-        for wavA, slcA in slice_step(waveA, labA, LENGTH, DELTA, "A"):
+        for wavA, slcA in slice_step(waveA, labA, LENGTH, DELTA):
             if keep_slice(slcA):
                 melA = convert_spectrogram(wavA)
                 Xa.append(melA)
                 ya.append(slcA)
         
-        for wavB, slcB in slice_step(waveB, labB, LENGTH, DELTA, "B"):
+        for wavB, slcB in slice_step(waveB, labB, LENGTH, DELTA):
             if keep_slice(slcB):
                 melB = convert_spectrogram(wavB)
                 Xb.append(melB)
@@ -87,6 +88,7 @@ def create_spectrograms(dataf):
     ''' % SKIPPED)
     
     all_labels = sorted(all_labels)
+    assert len(all_labels) == CLASSES + 1
     
     DATA_DIR = os.path.dirname(dataf)
     
@@ -116,13 +118,13 @@ def keep_slice(slc):
     else:
         return True
 
-def slice_step(wav, lab, length, step, name):
+def slice_step(wav, lab, length, step):
     if len(wav) == len(lab) and len(wav) > length:
         d, r = divmod(len(wav)-length, step)
-        for i in tqdm.tqdm(range(0, d*step, step), desc="Slicing %s waves" % name, ncols=80):
-            yield wav[i:i+length], lab[i:i+length]
+        for i in range(0, d*step, step):
+            yield wav[i:i+length], lab[i:i+length][::LABEL_SCALE]
         if r:
-            yield wav[-length:], lab[-length:]
+            yield wav[-length:], lab[-length:][::LABEL_SCALE]
     else:
         global SKIPPED
         SKIPPED += 1
@@ -146,6 +148,7 @@ def load_label_map(fname):
     with open(fname, "r") as f:
         labels = json.load(f)
         print("Classes: %d" % (len(labels)-1))
+        assert CLASSES + 1 == len(labels)
         idxmap = dict(enumerate(labels))
         keymap = {k:i for i, k in idxmap.items()}
         return keymap, idxmap
@@ -169,7 +172,7 @@ def match_labels(wav, phns):
         if start > end:
             start, end = end, start
         labels[start:end] = [name] * (end-start)
-    return labels[::LABEL_SCALE]
+    return labels
 
 @util.main(__name__)
 def main(fname, sample=0):
