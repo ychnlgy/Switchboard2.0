@@ -12,8 +12,8 @@ NUMCEP = 16
 CLASSES = 45
 
 LENGTH = 4000
-DELTA = 4000
-LABEL_SCALE = 200
+DELTA = 1000
+LABEL_SCALE = 100
 
 LABEL_SAVE_JSON = "switchboard-labels.json"
 OUT_FILE = "melspecs-switchboard.npy"

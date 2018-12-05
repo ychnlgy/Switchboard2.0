@@ -1,6 +1,6 @@
 import torch
 
-import models
+import torchmods
 
 from load import NUMCEP, LABEL_SCALE, CLASSES, LENGTH, DELTA
 
@@ -27,7 +27,7 @@ class Attention(torch.nn.Module):
         selects = (encoded * weights).sum(dim=1)
         return selects.unsqueeze(1) + decoded
 
-class SeqToSeq(models.Savable):
+class SeqToSeq(torchmods.Savable):
     
     def __init__(self, inputsize=NUMCEP, hiddensize=128, layers=4, dropout=0.2, embedsize=16, embedlayers=2, fc=1024, outsize=CLASSES+1):
         super(SeqToSeq, self).__init__()
