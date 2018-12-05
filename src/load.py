@@ -46,7 +46,7 @@ def view(specf):
         y = util.onehot(y, size).T
         for j in range(len(y)):
             axes[1, i].plot(y[j])
-        axes[1, 0].set_ylabel(str(l.tolist()))
+        axes[0, i].set_title(str(l.tolist()))
     
     pyplot.savefig("switchboard-mfcc-samples.png", bbox_inches="tight")
 
