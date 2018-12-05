@@ -81,7 +81,7 @@ def create_spectrograms(dataf):
                 yb.append(slcB)
                 lb.append(slcy)
     
-        all_labels.update(labA + labB)
+        all_labels.update(ya + yb)
     
     print('''
     ***
@@ -125,6 +125,7 @@ SKIPPED = 0
 def pad_fitlargest(labels):
     "Because the first class is EMPTY, we can use that as padding."
     longest = max(map(len, labels))
+    print("Labels padded to length: %d" % longest)
     def pad(arr):
         out = numpy.zeros(longest).astype(numpy.int32)
         out[:len(arr)] = arr
