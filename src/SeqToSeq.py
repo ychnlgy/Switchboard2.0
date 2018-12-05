@@ -29,7 +29,7 @@ class Attention(torch.nn.Module):
 
 class SeqToSeq(torchmods.Savable):
     
-    def __init__(self, inputsize=NUMCEP, hiddensize=128, layers=4, dropout=0.2, embedsize=16, embedlayers=2, fc=1024, outsize=CLASSES+1):
+    def __init__(self, inputsize=NUMCEP, hiddensize=256, layers=4, dropout=0.2, embedsize=16, embedlayers=2, fc=1024, outsize=CLASSES+1):
         super(SeqToSeq, self).__init__()
         self.enc = torch.nn.GRU(
             inputsize,
