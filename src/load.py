@@ -41,11 +41,12 @@ def view(specf):
     kmap, imap = load_label_map(os.path.join(specf, LABEL_SAVE_JSON))
     size = len(kmap)
     
-    for i, (x, y) in zip(range(SAMPLES), data):
+    for i, (x, y, l) in zip(range(SAMPLES), data):
         axes[0, i].imshow(x.T, cmap="hot", interpolation="bicubic", aspect="auto")
         y = util.onehot(y, size).T
         for j in range(len(y)):
             axes[1, i].plot(y[j])
+        axes[1, 0].set_ylabel(str(l.tolist()))
     
     pyplot.savefig("switchboard-mfcc-samples.png", bbox_inches="tight")
 
