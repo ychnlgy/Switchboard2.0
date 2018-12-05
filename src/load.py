@@ -35,6 +35,9 @@ def view(specf):
     
     data = load(specf)
     
+    label_file = os.path.join(specf, LABEL_SAVE_JSON)
+    keymap, idxmap = load_label_map(label_file)
+    
     fig, axes = pyplot.subplots(nrows=2, ncols=SAMPLES)
     fig.set_size_inches(18, 6)
     
@@ -46,7 +49,8 @@ def view(specf):
         y = util.onehot(y, size).T
         for j in range(len(y)):
             axes[1, i].plot(y[j])
-        axes[0, i].set_title(str(l.tolist()))
+        title = [idxmap[i] for i in l if i]
+        axes[0, i].set_title(", ".join(title))
     
     pyplot.savefig("switchboard-mfcc-samples.png", bbox_inches="tight")
 
